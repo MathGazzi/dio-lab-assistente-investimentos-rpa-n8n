@@ -1,0 +1,226 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "url": "https://raw.githubusercontent.com/digitalinnovationone/dio-lab-assistente-investimentos-rpa-n8n/main/docs/data.csv",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        304,
+        -160
+      ],
+      "id": "02a9f54a-20b9-4b31-acea-9ff2e177febb",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.2,
+      "position": [
+        528,
+        -160
+      ],
+      "id": "f8e5e4cc-6eeb-45ea-9392-6cb4de4f4352",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "Clientes",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.2,
+      "position": [
+        -176,
+        -160
+      ],
+      "id": "af8aa771-270a-4e26-ade2-e906b368290b",
+      "name": "Webhook",
+      "webhookId": "b6f3c404-1eac-4588-b8db-d24835f408a2"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "body.clientes",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1.1,
+      "position": [
+        80,
+        -160
+      ],
+      "id": "67027249-8959-461e-9712-02019cc59650",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8f93c0b8-0fbb-403d-8638-ca0f530f4295",
+              "name": "mensagem",
+              "value": "={{ $json.mensagem }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1008,
+        -160
+      ],
+      "id": "384fcb06-acd9-46c3-9be3-e88fe269e085",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "content": "CLIENTES\n",
+        "height": 288,
+        "width": 464
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -208,
+        -240
+      ],
+      "id": "af2d843c-dc27-4acc-a4fd-889767f25f83",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "INVESTIMENTOS\n\n",
+        "height": 288,
+        "width": 448,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        256,
+        -240
+      ],
+      "id": "151d1201-71b7-4082-a145-08ad12945d7b",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Pega os clientes do Split Out\nconst clientes = $('Split Out').all();\n\n// 2. Pega os investimentos do Extract from File\nconst investimentos = $('Extract from File').all();\n\n// 3. Monta a lista final com as mensagens estáticas da Etapa 4 (MVP)\nreturn clientes.map(itemCliente => {\n  const cliente = itemCliente.json;\n  \n  // Encontra o investimento do perfil\n  const investComp = investimentos.find(inv => \n    inv.json.perfil && cliente.perfil && \n    inv.json.perfil.toLowerCase() === cliente.perfil.toLowerCase()\n  );\n\n  const produto = investComp ? investComp.json.produto : \"Poupança\";\n  const rentabilidade = investComp ? investComp.json.rentabilidade : \"6.2%\";\n  \n  // Templates fixos baseados no perfil (exatamente o que a DIO pediu)\n  let textoEstrategia = \"\";\n  if (cliente.perfil.toLowerCase() === \"conservador\") {\n    textoEstrategia = \"Recomendamos foco em renda fixa e segurança.\";\n  } else if (cliente.perfil.toLowerCase() === \"moderado\") {\n    textoEstrategia = \"Recomendamos um mix equilibrado entre renda fixa e variável.\";\n  } else {\n    textoEstrategia = \"Recomendamos ênfase em ações e maior potencial de retorno.\";\n  }\n\n  const mensagemFinal = `Olá ${cliente.nome.split(' ')[0]}! Seu saldo é ${cliente.saldo} e seu perfil é ${cliente.perfil}. ${textoEstrategia} Sugestão de produto: ${produto} (${rentabilidade}).`;\n\n  return {\n    json: {\n      nome: cliente.nome,\n      email: cliente.email,\n      saldo: cliente.saldo,\n      perfil: cliente.perfil,\n      produto: produto,\n      rentabilidade: rentabilidade,\n      mensagem: mensagemFinal\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        784,
+        -160
+      ],
+      "id": "fab1ff6b-1a2a-4da1-9180-020ed7a6b271",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "content": "JUNÇÃO DOS DADOS E GERAÇÃO DA MENSAGEM\n\n",
+        "height": 288,
+        "width": 480
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        704,
+        -240
+      ],
+      "id": "bb0842b5-bf9f-49fe-bb79-798c8310769b",
+      "name": "Sticky Note2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "c4ddda3d-9156-4bcc-b9bd-13f8b4a488e8",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "782fd6f61ae232b74d65377c2a9e41d34e7e802ced5a3797eebcb22b6b9f9300"
+  },
+  "nodeGroups": [],
+  "id": "PpMsG6DUnMEqnBtP",
+  "tags": []
+}
